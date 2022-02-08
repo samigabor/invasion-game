@@ -15,6 +15,7 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
   const [gameContract, setGameContract] = useState(null);
+  const [isRinkeby, setIsRinkeby] = useState(false);
 
   // Actions
   const checkIfWalletIsConnected = async () => {
@@ -105,8 +106,8 @@ const App = () => {
 
   const checkNetwork = async () => {
     try {
-      if (window.ethereum.networkVersion !== "4") {
-        alert("Please connect to Rinkeby!");
+      if (window.ethereum.networkVersion === "4") {
+        setIsRinkeby(true);
       }
     } catch (error) {
       console.log(error);
@@ -155,7 +156,13 @@ const App = () => {
         <div className="header-container">
           <p className="header gradient-text">⚔️ Invasion ⚔️</p>
           <p className="sub-text">Team up to protect the Planet Earth!</p>
-          {renderContent()}
+          {isRinkeby ? (
+            renderContent()
+          ) : (
+            <h1 style={{ color: "white" }}>
+              Network not supported. Please swith to Rinkeby!
+            </h1>
+          )}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />

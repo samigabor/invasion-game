@@ -72,7 +72,11 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         console.log("CharacterNFT: ", characterNFT);
         setCharacterNFT(transformCharacterData(characterNFT));
         alert(
-          `Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${gameContract}/${tokenId.toNumber()}`
+          `Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${
+            gameContract.address
+          }/${tokenId.toNumber()} or here: https://rinkeby.rarible.com/token/${
+            gameContract.address
+          }:${tokenId.toNumber()}`
         );
       }
     };
