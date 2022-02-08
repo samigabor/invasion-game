@@ -2,7 +2,7 @@
 
 ## Contract address
 
-0x9e80991fb4d6fa13675456f37167276b5ae17728
+0x2eD8EdD50FF19271F3fee9bC174a36CbA9F1d6e6
 
 ## OpenSea NFT collection
 
