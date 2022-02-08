@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "homepage": "http://samigabor.github.io/invasion-game",
+  "short_name": "Invasion Game",
+  "name": "Protect the Planet Earth from evil Loki",
   "icons": [
     {
       "src": "favicon.ico",
