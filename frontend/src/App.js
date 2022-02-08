@@ -160,7 +160,7 @@ const App = () => {
             renderContent()
           ) : (
             <h1 style={{ color: "white" }}>
-              Network not supported. Please swith to Rinkeby!
+              Network not supported. Please switch to Rinkeby!
             </h1>
           )}
         </div>
