@@ -1,6 +1,6 @@
-const CONTRACT_ADDRESS = "0x2eD8EdD50FF19271F3fee9bC174a36CbA9F1d6e6";
+const CONTRACT_ADDRESS = "0x4A7686AC03DF970F01E2699a710aAFbb13A05613";
 const OPENSEA_COLLECTION_RINKEBY =
-  "https://testnets.opensea.io/collection/heroes-a5ah4x2wks";
+  "https://testnets.opensea.io/collection/heroes-r6sxy87cno";
 
 const transformCharacterData = (characterData) => {
   return {

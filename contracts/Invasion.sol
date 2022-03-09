@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -25,7 +25,7 @@ struct Invador {
     uint256 attackDamage;
 }
 
-contract Invasion is ERC721 {
+contract Invasion is ERC721, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -42,6 +42,7 @@ contract Invasion is ERC721 {
         uint256 characterIndex
     );
     event AttackComplete(uint256 newInvadorHp, uint256 newPlayerHp);
+    event HealComplete(uint256 playerIndex, uint256 playerHp);
 
     constructor(
         string[] memory characterNames,
@@ -118,6 +119,12 @@ contract Invasion is ERC721 {
         return invador;
     }
 
+    /**
+     * @notice Mints a NFT based on the provided index which is mapped to one of the default characters
+     * @param _characterIndex the characted index
+     * @dev multiple NFTs are not supporded and mining another NFT would overwrite the current one
+     * @dev _characterIndex is not enforced to be one of the default character indexes
+     **/
     function mintCharacterNFT(uint256 _characterIndex) external {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
@@ -178,6 +185,60 @@ contract Invasion is ERC721 {
         );
 
         emit AttackComplete(invador.hp, player.hp);
+    }
+
+    /**
+     * @notice Calculates the cost of healing based on the difference between the maxHp and hp
+     * @notice The sender is required to own an NFT
+     * @dev multiple NFTs are not supporded yet
+     * @return the cost for healing
+     **/
+    function healCost() public view returns (uint256) {
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        require(nftTokenIdOfPlayer > 0, "Sender does not have an nft minted.");
+        CharacterAttributes storage player = nftHolderAttributes[
+            nftTokenIdOfPlayer
+        ];
+        uint256 etherForHpCost = 10**15; // 1000 hp == 0.1 ether
+        return (player.maxHp - player.hp) * etherForHpCost;
+    }
+
+    /**
+     * @notice Allows the contract owner to withdraw all funds from contract
+     **/
+    function withdraw() external payable onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    /**
+     * @notice Resets the player hp to maxHp
+     * @notice The sender is required to own an NFT
+     * @dev multiple NFTs are not supporded yet
+     **/
+    function heal() external payable {
+        require(msg.value >= healCost(), "Not enough funds to heal!");
+        console.log("Value sent for healing %s: ", msg.value);
+
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributes[
+            nftTokenIdOfPlayer
+        ];
+
+        uint256 healHp = player.maxHp - player.hp;
+
+        require(healHp > 0, "Player already has the max HP!");
+
+        payable(owner()).transfer(msg.value);
+
+        player.hp = player.maxHp;
+
+        console.log(
+            "\nPlayer w/ character %s was healed and has %s HP",
+            player.name,
+            player.hp
+        );
+
+        emit HealComplete(player.characterIndex, player.hp);
     }
 
     function tokenURI(uint256 _tokenId)

@@ -25,6 +25,25 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   };
 
+  const runHealAction = async () => {
+    try {
+      if (gameContract) {
+        setAttackState("healing");
+        const healCost = await gameContract.healCost();
+        console.log("healCost", healCost);
+        const cost = ethers.utils.formatEther(healCost);
+        console.log("cost", cost);
+        const healTxn = await gameContract.heal({ value: healCost });
+        await healTxn.wait();
+        console.log("healTxn:", healTxn);
+        setAttackState("healed");
+      }
+    } catch (error) {
+      console.error("Error healing player:", error);
+      setAttackState("");
+    }
+  };
+
   useEffect(() => {
     const { ethereum } = window;
 
@@ -51,23 +70,30 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     };
 
     const onAttackComplete = (newBossHp, newPlayerHp) => {
-      const bossHp = newBossHp.toNumber();
-      const playerHp = newPlayerHp.toNumber();
+      setInvador((prevState) => ({ ...prevState, hp: newBossHp.toNumber() }));
+      setCharacterNFT((prevState) => ({
+        ...prevState,
+        hp: newPlayerHp.toNumber(),
+      }));
+    };
 
-      console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`);
-
-      setInvador((prevState) => ({ ...prevState, hp: bossHp }));
-      setCharacterNFT((prevState) => ({ ...prevState, hp: playerHp }));
+    const onHealComplete = (newPlayerIndex, newPlayerHp) => {
+      setCharacterNFT((prevState) => ({
+        ...prevState,
+        hp: newPlayerHp.toNumber(),
+      }));
     };
 
     if (gameContract) {
       fetchInvador();
       gameContract.on("AttackComplete", onAttackComplete);
+      gameContract.on("HealComplete", onHealComplete);
     }
 
     return () => {
       if (gameContract) {
         gameContract.off("AttackComplete", onAttackComplete);
+        gameContract.off("HealComplete", onHealComplete);
       }
     };
   }, [gameContract, setCharacterNFT]);
@@ -113,6 +139,12 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               <div className="stats">
                 <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
               </div>
+              <button
+                className="cta-button heal-button"
+                onClick={runHealAction}
+              >
+                {`❤️ Heal ❤️`}
+              </button>
             </div>
           </div>
         </div>
