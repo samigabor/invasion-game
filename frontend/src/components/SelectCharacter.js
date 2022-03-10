@@ -4,15 +4,17 @@ import { CONTRACT_ADDRESS, transformCharacterData } from "../constants";
 import "./SelectCharacter.css";
 import invasion from "../utils/Invasion.json";
 
-/*
- * Don't worry about setCharacterNFT just yet, we will talk about it soon!
- */
-const SelectCharacter = ({ setCharacterNFT }) => {
+const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
   const [defaultCharacters, setDefaultCharacters] = useState([]);
   const [gameContract, setGameContract] = useState(null);
 
-  const renderCharacters = () =>
-    defaultCharacters.map((character, index) => (
+  const renderCharacterList = ({
+    defaultCharacters,
+    setCharacterNFT,
+    setWeaponNFT,
+  }) => {
+    console.log("defaultCharacters:", defaultCharacters);
+    return defaultCharacters.map((character, index) => (
       <div className="character-item" key={character.name}>
         <div className="name-container">
           <p>{character.name}</p>
@@ -21,23 +23,38 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         <button
           type="button"
           className="character-mint-button"
-          onClick={mintCharacterNFTAction(index)}
+          onClick={mintCharacterNFTAction({
+            setCharacterNFT,
+            setWeaponNFT,
+            index,
+          })}
         >{`Mint ${character.name}`}</button>
       </div>
     ));
-
-  const mintCharacterNFTAction = (characterId) => async () => {
-    try {
-      if (gameContract) {
-        console.log("Minting character in progress...");
-        const mintTxn = await gameContract.mintCharacterNFT(characterId);
-        await mintTxn.wait();
-        console.log("mintTxn:", mintTxn);
-      }
-    } catch (error) {
-      console.warn("MintCharacterAction Error:", error);
-    }
   };
+
+  const mintCharacterNFTAction =
+    ({ setCharacterNFT, setWeaponNFT, index }) =>
+    async () => {
+      try {
+        if (gameContract) {
+          console.log("Minting character in progress...");
+          let mintTxn;
+          console.log("setCharacterNFT", setCharacterNFT);
+          console.log("setWeaponNFT", setWeaponNFT);
+          if (setCharacterNFT) {
+            mintTxn = await gameContract.mintCharacterNFT(index);
+          }
+          if (setWeaponNFT) {
+            mintTxn = await gameContract.mintWeaponNFT(index);
+          }
+          await mintTxn.wait();
+          console.log("mintTxn:", mintTxn);
+        }
+      } catch (error) {
+        console.warn("MintCharacterAction Error:", error);
+      }
+    };
 
   useEffect(() => {
     const { ethereum } = window;
@@ -56,7 +73,13 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   useEffect(() => {
     const getDefaultCharacters = async () => {
-      const characters = await gameContract.getDefaultCharacters();
+      let characters;
+      if (setCharacterNFT) {
+        characters = await gameContract.getDefaultCharacters();
+      }
+      if (setWeaponNFT) {
+        characters = await gameContract.getDefaultWeapons();
+      }
       setDefaultCharacters(
         characters.map((character) => transformCharacterData(character))
       );
@@ -68,9 +91,15 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       );
 
       if (gameContract) {
-        const characterNFT = await gameContract.checkIfUserHasNFT();
-        console.log("CharacterNFT: ", characterNFT);
-        setCharacterNFT(transformCharacterData(characterNFT));
+        const nft = await gameContract.checkIfUserHasNFTCharacter();
+        if (setCharacterNFT) {
+          console.log("character nft: ", nft);
+          setCharacterNFT(transformCharacterData(nft));
+        }
+        if (setWeaponNFT) {
+          console.log("weapon nft: ", nft);
+          setWeaponNFT(transformCharacterData(nft));
+        }
         alert(
           `Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${
             gameContract.address
@@ -87,22 +116,29 @@ const SelectCharacter = ({ setCharacterNFT }) => {
     }
 
     return () => {
-      /*
-       * When your component unmounts, let;s make sure to clean up this listener
-       */
       if (gameContract) {
         gameContract.off("CharacterNFTMinted", onCharacterMint);
       }
     };
-  }, [gameContract, setCharacterNFT]);
+  }, [gameContract, setCharacterNFT, setWeaponNFT]);
 
   return (
-    <div className="select-character-container">
-      <h2>Mint Your Hero. Choose wisely.</h2>
+    <>
       {defaultCharacters.length > 0 && (
-        <div className="character-grid">{renderCharacters()}</div>
+        <div className="select-character-container">
+          <h2>
+            Mint Your {setCharacterNFT ? "Hero" : "Weapon"}. Choose wisely.
+          </h2>
+          <div className="character-grid">
+            {renderCharacterList({
+              defaultCharacters,
+              setCharacterNFT,
+              setWeaponNFT,
+            })}
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

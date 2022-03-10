@@ -30,9 +30,11 @@ contract Invasion is ERC721, Ownable {
     Counters.Counter private _tokenIdCounter;
 
     CharacterAttributes[] defaultCharacters;
+    CharacterAttributes[] defaultWeapons;
 
     mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
     mapping(address => uint256) public nftHolders;
+    mapping(address => uint256) public nftWeaponHolders;
 
     Invador public invador;
 
@@ -41,6 +43,7 @@ contract Invasion is ERC721, Ownable {
         uint256 tokenId,
         uint256 characterIndex
     );
+    event WeaponNFTMinted(address sender, uint256 tokenId, uint256 weaponIndex);
     event AttackComplete(uint256 newInvadorHp, uint256 newPlayerHp);
     event HealComplete(uint256 playerIndex, uint256 playerHp);
 
@@ -52,7 +55,10 @@ contract Invasion is ERC721, Ownable {
         string memory invadorName,
         string memory invadorImageURI,
         uint256 invadorHp,
-        uint256 invadorAttackDamage
+        uint256 invadorAttackDamage,
+        string[] memory weaponNames,
+        string[] memory weaponImageURIs,
+        uint256[] memory weaponAttackDmg
     ) ERC721("Heroes", "HERO") {
         for (uint256 i = 0; i < characterNames.length; i += 1) {
             defaultCharacters.push(
@@ -65,14 +71,6 @@ contract Invasion is ERC721, Ownable {
                     attackDamage: characterAttackDmg[i]
                 })
             );
-
-            CharacterAttributes memory c = defaultCharacters[i];
-            console.log(
-                "Done initializing %s w/ HP %s, img %s",
-                c.name,
-                c.hp,
-                c.imageURI
-            );
         }
 
         invador = Invador({
@@ -83,17 +81,30 @@ contract Invasion is ERC721, Ownable {
             attackDamage: invadorAttackDamage
         });
 
-        console.log(
-            "Done initializing invador %s w/ HP %s, img %s",
-            invador.name,
-            invador.hp,
-            invador.imageURI
-        );
+        for (uint256 i = 0; i < weaponNames.length; i += 1) {
+            defaultWeapons.push(
+                CharacterAttributes({
+                    characterIndex: i,
+                    name: weaponNames[i],
+                    imageURI: weaponImageURIs[i],
+                    hp: 0,
+                    maxHp: 0,
+                    attackDamage: weaponAttackDmg[i]
+                })
+            );
+
+            CharacterAttributes memory w = defaultWeapons[i];
+            console.log(
+                "WEAPON_NAME: %s, WEAPON_IMAGE_URI: %s",
+                w.name,
+                w.imageURI
+            );
+        }
 
         _tokenIdCounter.increment();
     }
 
-    function checkIfUserHasNFT()
+    function checkIfUserHasNFTCharacter()
         external
         view
         returns (CharacterAttributes memory)
@@ -107,12 +118,34 @@ contract Invasion is ERC721, Ownable {
         }
     }
 
+    function checkIfUserHasNFTWeapon()
+        external
+        view
+        returns (CharacterAttributes memory)
+    {
+        uint256 id = nftWeaponHolders[msg.sender];
+        if (id > 0) {
+            return nftHolderAttributes[id];
+        } else {
+            CharacterAttributes memory emptyWeapon;
+            return emptyWeapon;
+        }
+    }
+
     function getDefaultCharacters()
         external
         view
         returns (CharacterAttributes[] memory)
     {
         return defaultCharacters;
+    }
+
+    function getDefaultWeapons()
+        external
+        view
+        returns (CharacterAttributes[] memory)
+    {
+        return defaultWeapons;
     }
 
     function getInvador() external view returns (Invador memory) {
@@ -150,6 +183,37 @@ contract Invasion is ERC721, Ownable {
         emit CharacterNFTMinted(msg.sender, tokenId, _characterIndex);
     }
 
+    /**
+     * @notice Mints a NFT based on the provided index which is mapped to one of the default weapons
+     * @param _weaponIndex the characted index
+     * @dev multiple NFTs are not supporded and mining another NFT would overwrite the current one
+     * @dev _weaponIndex is not enforced to be one of the default weapon indexes
+     **/
+    function mintWeaponNFT(uint256 _weaponIndex) external {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(msg.sender, tokenId);
+
+        nftHolderAttributes[tokenId] = CharacterAttributes({
+            characterIndex: _weaponIndex,
+            name: defaultWeapons[_weaponIndex].name,
+            imageURI: defaultWeapons[_weaponIndex].imageURI,
+            hp: defaultWeapons[_weaponIndex].hp,
+            maxHp: defaultWeapons[_weaponIndex].maxHp,
+            attackDamage: defaultWeapons[_weaponIndex].attackDamage
+        });
+
+        console.log(
+            "Minted NFT w/ tokenId %s and characterIndex %s",
+            tokenId,
+            _weaponIndex
+        );
+
+        nftWeaponHolders[msg.sender] = tokenId;
+
+        emit WeaponNFTMinted(msg.sender, tokenId, _weaponIndex);
+    }
+
     function attackInvador() external {
         uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
         CharacterAttributes storage player = nftHolderAttributes[
@@ -165,8 +229,13 @@ contract Invasion is ERC721, Ownable {
             player.hp = 0;
         }
 
+        uint256 nftTokenIdOfWeapon = nftWeaponHolders[msg.sender];
+        CharacterAttributes storage weapon = nftHolderAttributes[
+            nftTokenIdOfWeapon
+        ];
+
         if (invador.hp > player.attackDamage) {
-            invador.hp = invador.hp - player.attackDamage;
+            invador.hp = invador.hp - player.attackDamage - weapon.attackDamage;
         } else {
             invador.hp = 0;
         }

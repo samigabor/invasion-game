@@ -14,7 +14,13 @@ async function main() {
     "Loki",
     "https://cdn.mos.cms.futurecdn.net/MEtSje52B26WQxrYJgdvx4-1200-80.jpg",
     10000,
-    50
+    50,
+    ["The Hammer", "Infinity Gauntlet"], // Weapon Names
+    [
+      "https://img.fruugo.com/product/4/71/154499714_max.jpg",
+      "https://mlpnk72yciwc.i.optimole.com/cqhiHLc.WqA8~2eefa/w:600/h:853/q:75/https://bleedingcool.com/wp-content/uploads/2018/02/MARVEL-LEGENDS-SERIES-INFINITY-GAUNTLET-oop-2.jpg",
+    ], // weapon images
+    [500, 1000] // Attack damage values
   );
   // https://static.wikia.nocookie.net/avengers-assemble/images/e/ea/Revo-Cap.png/revision/latest/scale-to-width-down/1200?cb=20170615073447
 
@@ -22,25 +28,26 @@ async function main() {
 
   console.log("Invasion deployed to:", invasion.address);
 
-  let txn;
-  // there are 3 NFT types: ["Protos", "Terran", "Zerg"] with IDs: 0, 1, 2
-  txn = await invasion.mintCharacterNFT(0);
-  await txn.wait();
-  console.log("Minted NFT #1", await invasion.tokenURI(1));
+  // let txn;
+  // // there are 3 NFT types: ["Iron Man", "Captain America", "Hulk"] with IDs: 0, 1, 2
+  // txn = await invasion.mintCharacterNFT(0);
+  // await txn.wait();
+  // console.log("Minted NFT #1", await invasion.tokenURI(1));
 
-  txn = await invasion.mintCharacterNFT(1);
-  await txn.wait();
-  console.log("Minted NFT #2", await invasion.tokenURI(2));
+  // txn = await invasion.mintCharacterNFT(1);
+  // await txn.wait();
+  // console.log("Minted NFT #2", await invasion.tokenURI(2));
 
-  txn = await invasion.mintCharacterNFT(2);
-  await txn.wait();
-  console.log("Minted NFT #3", await invasion.tokenURI(3));
-
-  txn = await invasion.attackInvador();
-  await txn.wait();
+  // txn = await invasion.mintCharacterNFT(2);
+  // await txn.wait();
+  // console.log("Minted NFT #3", await invasion.tokenURI(3));
 
   // txn = await invasion.attackInvador();
   // await txn.wait();
+
+  // txn = await invasion.mintWeaponNFT(0);
+  // await txn.wait();
+  // console.log("Minted NFT Weapon:", await invasion.tokenURI(0));
 }
 
 main()

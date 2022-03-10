@@ -14,6 +14,7 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
+  const [weaponNFT, setWeaponNFT] = useState(null);
   const [gameContract, setGameContract] = useState(null);
   const [isRinkeby, setIsRinkeby] = useState(false);
 
@@ -45,9 +46,6 @@ const App = () => {
   };
 
   const renderContent = () => {
-    /*
-     * Scenario #1
-     */
     if (!currentAccount) {
       return (
         <div className="connect-wallet-container">
@@ -63,21 +61,23 @@ const App = () => {
           </button>
         </div>
       );
-      /*
-       * Scenario #2
-       */
     } else if (currentAccount && !characterNFT) {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
     } else {
+      console.log("weaponNFT", weaponNFT);
       return (
-        <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />
+        <>
+          <Arena
+            characterNFT={characterNFT}
+            setCharacterNFT={setCharacterNFT}
+            weaponNFT={weaponNFT}
+          />
+          {!weaponNFT && <SelectCharacter setWeaponNFT={setWeaponNFT} />}
+        </>
       );
     }
   };
 
-  /*
-   * Implement your connectWallet method here
-   */
   const connectWalletAction = async () => {
     try {
       const { ethereum } = window;
@@ -88,15 +88,12 @@ const App = () => {
       }
 
       /*
-       * Fancy method to request access to account.
+       * Request access to account.
        */
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
 
-      /*
-       * Boom! This should print out public address once we authorize Metamask.
-       */
       console.log("Connected", accounts[0]);
       setCurrentAccount(accounts[0]);
     } catch (error) {
@@ -106,7 +103,10 @@ const App = () => {
 
   const checkNetwork = async () => {
     try {
-      if (window.ethereum.networkVersion === "4") {
+      if (
+        window.ethereum.networkVersion === "4" ||
+        window.ethereum.networkVersion === "31337"
+      ) {
         setIsRinkeby(true);
       }
     } catch (error) {
@@ -135,7 +135,7 @@ const App = () => {
 
       setGameContract(newGameContract);
 
-      const txn = await newGameContract.checkIfUserHasNFT();
+      const txn = await newGameContract.checkIfUserHasNFTCharacter();
       if (txn.name) {
         console.log("User has character NFT");
         setCharacterNFT(transformCharacterData(txn));
@@ -147,6 +147,35 @@ const App = () => {
     if (currentAccount) {
       console.log("CurrentAccount:", currentAccount);
       fetchNFTMetadata();
+    }
+  }, [currentAccount]);
+
+  useEffect(() => {
+    const fetchWeaponNFTMetadata = async () => {
+      console.log("Checking for Character NFT on address:", currentAccount);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const newGameContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        invasion.abi,
+        signer
+      );
+
+      setGameContract(newGameContract);
+
+      const txn = await newGameContract.checkIfUserHasNFTWeapon();
+      if (txn.name) {
+        console.log("User has weapon NFT");
+        setWeaponNFT(transformCharacterData(txn));
+      } else {
+        console.log("No weapon NFT found");
+      }
+    };
+
+    if (currentAccount) {
+      console.log("CurrentAccount:", currentAccount);
+      fetchWeaponNFTMetadata();
     }
   }, [currentAccount]);
 

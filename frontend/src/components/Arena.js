@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESS, transformCharacterData } from "../constants";
 import myEpicGame from "../utils/Invasion.json";
 import "./Arena.css";
 
-const Arena = ({ characterNFT, setCharacterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
   const [gameContract, setGameContract] = useState(null);
   const [invador, setInvador] = useState(null);
   const [attackState, setAttackState] = useState("");
@@ -98,6 +98,43 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     };
   }, [gameContract, setCharacterNFT]);
 
+  const mintWeaponNFTAction = (weaponId) => async () => {
+    console.log("weaponId", weaponId);
+    try {
+      console.log("try");
+      if (gameContract) {
+        console.log("gameContract", gameContract);
+        console.log("Minting weapon in progress...");
+        const mintTxn = await gameContract.mintWeaponNFT(weaponId);
+        await mintTxn.wait();
+        console.log("mintTxn:", mintTxn);
+      }
+    } catch (error) {
+      console.warn("MintWeaponAction Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    const onWeaponMint = async (sender, tokenId, weaponIndex) => {
+      console.log(
+        `WeaponNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} weaponIndex: ${weaponIndex.toNumber()}`
+      );
+    };
+
+    if (gameContract) {
+      gameContract.on("WeaponNFTMinted", onWeaponMint);
+    }
+
+    return () => {
+      /*
+       * When your component unmounts, let;s make sure to clean up this listener
+       */
+      if (gameContract) {
+        gameContract.off("WeaponNFTMinted", onWeaponMint);
+      }
+    };
+  }, [gameContract]);
+
   return (
     <div className="arena-container">
       {invador && (
@@ -145,6 +182,21 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               >
                 {`❤️ Heal ❤️`}
               </button>
+              {weaponNFT && (
+                <div className="weapons">
+                  <img
+                    className="weapon-image"
+                    src={weaponNFT.imageURI}
+                    alt={`Weapon ${weaponNFT.name}`}
+                  />
+                </div>
+              )}
+              {/* <button
+                className="cta-button mint-weapon-button"
+                onClick={mintWeaponNFTAction(0)}
+              >
+                Mint Weapon
+              </button> */}
             </div>
           </div>
         </div>
