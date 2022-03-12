@@ -8,40 +8,12 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
   const [defaultCharacters, setDefaultCharacters] = useState([]);
   const [gameContract, setGameContract] = useState(null);
 
-  const renderCharacterList = ({
-    defaultCharacters,
-    setCharacterNFT,
-    setWeaponNFT,
-  }) => {
-    console.log("defaultCharacters:", defaultCharacters);
-    return defaultCharacters.map((character, index) => (
-      <div className="character-item" key={character.name}>
-        <div className="name-container">
-          <p>{character.name}</p>
-        </div>
-        <img src={character.imageURI} alt={character.name} />
-        <button
-          type="button"
-          className="character-mint-button"
-          onClick={mintCharacterNFTAction({
-            setCharacterNFT,
-            setWeaponNFT,
-            index,
-          })}
-        >{`Mint ${character.name}`}</button>
-      </div>
-    ));
-  };
-
   const mintCharacterNFTAction =
     ({ setCharacterNFT, setWeaponNFT, index }) =>
     async () => {
       try {
         if (gameContract) {
-          console.log("Minting character in progress...");
           let mintTxn;
-          console.log("setCharacterNFT", setCharacterNFT);
-          console.log("setWeaponNFT", setWeaponNFT);
           if (setCharacterNFT) {
             mintTxn = await gameContract.mintCharacterNFT(index);
           }
@@ -85,7 +57,7 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
       );
     };
 
-    const onCharacterMint = async (sender, tokenId, characterIndex) => {
+    const onMintNFT = async (sender, tokenId, characterIndex) => {
       console.log(
         `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
       );
@@ -93,11 +65,9 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
       if (gameContract) {
         const nft = await gameContract.checkIfUserHasNFTCharacter();
         if (setCharacterNFT) {
-          console.log("character nft: ", nft);
           setCharacterNFT(transformCharacterData(nft));
         }
         if (setWeaponNFT) {
-          console.log("weapon nft: ", nft);
           setWeaponNFT(transformCharacterData(nft));
         }
         alert(
@@ -112,12 +82,14 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
 
     if (gameContract) {
       getDefaultCharacters();
-      gameContract.on("CharacterNFTMinted", onCharacterMint);
+      gameContract.on("CharacterNFTMinted", onMintNFT);
+      gameContract.on("WeaponNFTMinted", onMintNFT);
     }
 
     return () => {
       if (gameContract) {
-        gameContract.off("CharacterNFTMinted", onCharacterMint);
+        gameContract.off("CharacterNFTMinted", onMintNFT);
+        gameContract.off("WeaponNFTMinted", onMintNFT);
       }
     };
   }, [gameContract, setCharacterNFT, setWeaponNFT]);
@@ -127,14 +99,26 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
       {defaultCharacters.length > 0 && (
         <div className="select-character-container">
           <h2>
-            Mint Your {setCharacterNFT ? "Hero" : "Weapon"}. Choose wisely.
+            Mint Your {setCharacterNFT ? "Hero Choose wisely." : "Weapon:"}.
           </h2>
           <div className="character-grid">
-            {renderCharacterList({
-              defaultCharacters,
-              setCharacterNFT,
-              setWeaponNFT,
-            })}
+            {defaultCharacters.map((character, index) => (
+              <div className="character-item" key={character.name}>
+                <div className="name-container">
+                  <p>{character.name}</p>
+                </div>
+                <img src={character.imageURI} alt={character.name} />
+                <button
+                  type="button"
+                  className="character-mint-button"
+                  onClick={mintCharacterNFTAction({
+                    setCharacterNFT,
+                    setWeaponNFT,
+                    index,
+                  })}
+                >{`Mint ${character.name}`}</button>
+              </div>
+            ))}
           </div>
         </div>
       )}

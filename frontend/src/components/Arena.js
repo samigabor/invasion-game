@@ -13,10 +13,8 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
     try {
       if (gameContract) {
         setAttackState("attacking");
-        console.log("Attacking invador...");
         const attackTxn = await gameContract.attackInvador();
         await attackTxn.wait();
-        console.log("attackTxn:", attackTxn);
         setAttackState("hit");
       }
     } catch (error) {
@@ -30,12 +28,8 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
       if (gameContract) {
         setAttackState("healing");
         const healCost = await gameContract.healCost();
-        console.log("healCost", healCost);
-        const cost = ethers.utils.formatEther(healCost);
-        console.log("cost", cost);
         const healTxn = await gameContract.heal({ value: healCost });
         await healTxn.wait();
-        console.log("healTxn:", healTxn);
         setAttackState("healed");
       }
     } catch (error) {
