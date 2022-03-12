@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
-import { CONTRACT_ADDRESS } from "../constants";
+import { CONTRACT_ADDRESS, SUPPORTED_NETWORK } from "../constants";
 import invasion from "../utils/Invasion.json";
+import { mumbai, rinkeby } from "../utils/networks";
 
 const EthereumContext = createContext(null);
 const EthersContext = createContext({});
@@ -31,8 +32,15 @@ const EthersProvider = ({ children }) => {
     let signer = null;
     let contract = null;
     if (ethereum) {
-      provider = new ethers.providers.Web3Provider(ethereum);
+      provider = new ethers.providers.Web3Provider(ethereum, "any");
       signer = provider.getSigner();
+      provider.on("network", (newNetwork, oldNetwork) => {
+        // When a Provider makes its initial connection, it emits a "network" event with a null oldNetwork along with the newNetwork.
+        // So, if the oldNetwork exists, it represents a changing network
+        if (oldNetwork) {
+          window.location.reload();
+        }
+      });
       contract = new ethers.Contract(CONTRACT_ADDRESS, invasion.abi, signer);
     }
     return { provider, signer, contract };
@@ -91,13 +99,48 @@ const WalletProvider = ({ children }) => {
     setIsLoading(false);
   };
 
+  const switchNetwork = async () => {
+    if (!ethereum) {
+      return;
+    }
+
+    try {
+      // Try to switch to the Mumbai testnet
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: SUPPORTED_NETWORK.chainId }], // Check chainIds.js for hexadecimal network ids
+      });
+    } catch (error) {
+      // The error code 4902 means that the chain has not been added to MetaMask
+      // In this case we ask the user to add it to their MetaMask
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [SUPPORTED_NETWORK],
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     checkIfWalletIsConnected();
   });
 
   return (
     <WalletContext.Provider
-      value={{ account, balance, isLoading, connectWallet, chainId }}
+      value={{
+        account,
+        balance,
+        isLoading,
+        connectWallet,
+        chainId,
+        switchNetwork,
+      }}
     >
       {children}
     </WalletContext.Provider>

@@ -4,12 +4,12 @@ import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
 import Arena from "./components/Arena";
 import SelectCharacter from "./components/SelectCharacter";
-import { TWITTER_LINK, TWITTER_HANDLE } from "./constants";
+import { TWITTER_LINK, TWITTER_HANDLE, SUPPORTED_NETWORK } from "./constants";
 import { transformCharacterData } from "./utils/helper-functions";
 
 const App = () => {
   const { contract } = useEthers();
-  const { account, connectWallet, chainId } = useWallet();
+  const { account, connectWallet, chainId, switchNetwork } = useWallet();
 
   const [characterNFT, setCharacterNFT] = useState(null);
   const [weaponNFT, setWeaponNFT] = useState(null);
@@ -70,12 +70,20 @@ const App = () => {
         <div className="header-container">
           <p className="header gradient-text">⚔️ Invasion ⚔️</p>
           <p className="sub-text">Team up to protect the Planet Earth!</p>
-          {chainId === "0x4" ? (
+          {chainId === SUPPORTED_NETWORK.chainId ? (
             renderContent()
           ) : (
-            <h1 style={{ color: "white" }}>
-              Network not supported. Please switch to Rinkeby!
-            </h1>
+            <div>
+              <h1 style={{ color: "white" }}>
+                Please switch to {SUPPORTED_NETWORK.chainName}
+              </h1>
+              <button
+                className="cta-button mint-button"
+                onClick={switchNetwork}
+              >
+                Click here to switch
+              </button>
+            </div>
           )}
         </div>
         <div className="footer-container">
