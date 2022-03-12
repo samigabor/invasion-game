@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import { CONTRACT_ADDRESS, transformCharacterData } from "../constants";
-import myEpicGame from "../utils/Invasion.json";
-import "./Arena.css";
+import { useEthers } from "../context";
+import { transformCharacterData } from "../utils/helper-functions";
+import "../styles/Arena.css";
 
 const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
-  const [gameContract, setGameContract] = useState(null);
+  const { contract } = useEthers();
+
   const [invador, setInvador] = useState(null);
   const [attackState, setAttackState] = useState("");
 
   const runAttackAction = async () => {
     try {
-      if (gameContract) {
+      if (contract) {
         setAttackState("attacking");
-        const attackTxn = await gameContract.attackInvador();
+        const attackTxn = await contract.attackInvador();
         await attackTxn.wait();
         setAttackState("hit");
       }
@@ -25,10 +25,10 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
 
   const runHealAction = async () => {
     try {
-      if (gameContract) {
+      if (contract) {
         setAttackState("healing");
-        const healCost = await gameContract.healCost();
-        const healTxn = await gameContract.heal({ value: healCost });
+        const healCost = await contract.healCost();
+        const healTxn = await contract.heal({ value: healCost });
         await healTxn.wait();
         setAttackState("healed");
       }
@@ -39,27 +39,8 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
   };
 
   useEffect(() => {
-    const { ethereum } = window;
-
-    if (ethereum) {
-      const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
-      const gameContract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        myEpicGame.abi,
-        signer
-      );
-
-      setGameContract(gameContract);
-    } else {
-      console.log("Ethereum object not found");
-    }
-  }, []);
-
-  useEffect(() => {
     const fetchInvador = async () => {
-      const incadorTxn = await gameContract.getInvador();
-      console.log("Invador:", incadorTxn);
+      const incadorTxn = await contract.getInvador();
       setInvador(transformCharacterData(incadorTxn));
     };
 
@@ -78,35 +59,19 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
       }));
     };
 
-    if (gameContract) {
+    if (contract) {
       fetchInvador();
-      gameContract.on("AttackComplete", onAttackComplete);
-      gameContract.on("HealComplete", onHealComplete);
+      contract.on("AttackComplete", onAttackComplete);
+      contract.on("HealComplete", onHealComplete);
     }
 
     return () => {
-      if (gameContract) {
-        gameContract.off("AttackComplete", onAttackComplete);
-        gameContract.off("HealComplete", onHealComplete);
+      if (contract) {
+        contract.off("AttackComplete", onAttackComplete);
+        contract.off("HealComplete", onHealComplete);
       }
     };
-  }, [gameContract, setCharacterNFT]);
-
-  const mintWeaponNFTAction = (weaponId) => async () => {
-    console.log("weaponId", weaponId);
-    try {
-      console.log("try");
-      if (gameContract) {
-        console.log("gameContract", gameContract);
-        console.log("Minting weapon in progress...");
-        const mintTxn = await gameContract.mintWeaponNFT(weaponId);
-        await mintTxn.wait();
-        console.log("mintTxn:", mintTxn);
-      }
-    } catch (error) {
-      console.warn("MintWeaponAction Error:", error);
-    }
-  };
+  }, [contract, setCharacterNFT]);
 
   useEffect(() => {
     const onWeaponMint = async (sender, tokenId, weaponIndex) => {
@@ -115,19 +80,16 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
       );
     };
 
-    if (gameContract) {
-      gameContract.on("WeaponNFTMinted", onWeaponMint);
+    if (contract) {
+      contract.on("WeaponNFTMinted", onWeaponMint);
     }
 
     return () => {
-      /*
-       * When your component unmounts, let;s make sure to clean up this listener
-       */
-      if (gameContract) {
-        gameContract.off("WeaponNFTMinted", onWeaponMint);
+      if (contract) {
+        contract.off("WeaponNFTMinted", onWeaponMint);
       }
     };
-  }, [gameContract]);
+  }, [contract]);
 
   return (
     <div className="arena-container">
@@ -185,12 +147,6 @@ const Arena = ({ characterNFT, setCharacterNFT, weaponNFT }) => {
                   />
                 </div>
               )}
-              {/* <button
-                className="cta-button mint-weapon-button"
-                onClick={mintWeaponNFTAction(0)}
-              >
-                Mint Weapon
-              </button> */}
             </div>
           </div>
         </div>

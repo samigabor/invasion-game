@@ -1,24 +1,24 @@
-import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
-import { CONTRACT_ADDRESS, transformCharacterData } from "../constants";
-import "./SelectCharacter.css";
-import invasion from "../utils/Invasion.json";
+import { useEthers } from "../context";
+import "../styles/SelectCharacter.css";
+import { transformCharacterData } from "../utils/helper-functions";
 
 const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
+  const { contract } = useEthers();
+
   const [defaultCharacters, setDefaultCharacters] = useState([]);
-  const [gameContract, setGameContract] = useState(null);
 
   const mintCharacterNFTAction =
     ({ setCharacterNFT, setWeaponNFT, index }) =>
     async () => {
       try {
-        if (gameContract) {
+        if (contract) {
           let mintTxn;
           if (setCharacterNFT) {
-            mintTxn = await gameContract.mintCharacterNFT(index);
+            mintTxn = await contract.mintCharacterNFT(index);
           }
           if (setWeaponNFT) {
-            mintTxn = await gameContract.mintWeaponNFT(index);
+            mintTxn = await contract.mintWeaponNFT(index);
           }
           await mintTxn.wait();
           console.log("mintTxn:", mintTxn);
@@ -29,28 +29,13 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
     };
 
   useEffect(() => {
-    const { ethereum } = window;
-
-    if (ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        invasion.abi,
-        signer
-      );
-      setGameContract(contract);
-    }
-  }, []);
-
-  useEffect(() => {
     const getDefaultCharacters = async () => {
       let characters;
       if (setCharacterNFT) {
-        characters = await gameContract.getDefaultCharacters();
+        characters = await contract.getDefaultCharacters();
       }
       if (setWeaponNFT) {
-        characters = await gameContract.getDefaultWeapons();
+        characters = await contract.getDefaultWeapons();
       }
       setDefaultCharacters(
         characters.map((character) => transformCharacterData(character))
@@ -62,8 +47,8 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
         `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
       );
 
-      if (gameContract) {
-        const nft = await gameContract.checkIfUserHasNFTCharacter();
+      if (contract) {
+        const nft = await contract.checkIfUserHasNFTCharacter();
         if (setCharacterNFT) {
           setCharacterNFT(transformCharacterData(nft));
         }
@@ -72,34 +57,34 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
         }
         alert(
           `Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${
-            gameContract.address
+            contract.address
           }/${tokenId.toNumber()} or here: https://rinkeby.rarible.com/token/${
-            gameContract.address
+            contract.address
           }:${tokenId.toNumber()}`
         );
       }
     };
 
-    if (gameContract) {
+    if (contract) {
       getDefaultCharacters();
-      gameContract.on("CharacterNFTMinted", onMintNFT);
-      gameContract.on("WeaponNFTMinted", onMintNFT);
+      contract.on("CharacterNFTMinted", onMintNFT);
+      contract.on("WeaponNFTMinted", onMintNFT);
     }
 
     return () => {
-      if (gameContract) {
-        gameContract.off("CharacterNFTMinted", onMintNFT);
-        gameContract.off("WeaponNFTMinted", onMintNFT);
+      if (contract) {
+        contract.off("CharacterNFTMinted", onMintNFT);
+        contract.off("WeaponNFTMinted", onMintNFT);
       }
     };
-  }, [gameContract, setCharacterNFT, setWeaponNFT]);
+  }, [contract, setCharacterNFT, setWeaponNFT]);
 
   return (
     <>
       {defaultCharacters.length > 0 && (
         <div className="select-character-container">
           <h2>
-            Mint Your {setCharacterNFT ? "Hero Choose wisely." : "Weapon:"}.
+            Mint Your {setCharacterNFT ? "Hero. Choose wisely." : "Weapon:"}
           </h2>
           <div className="character-grid">
             {defaultCharacters.map((character, index) => (

@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
+import { useEthers, useWallet } from "./context";
+import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
-import "./App.css";
-import SelectCharacter from "./components/SelectCharacter";
-import { CONTRACT_ADDRESS, transformCharacterData } from "./constants";
-import invasion from "./utils/Invasion.json";
-import { ethers } from "ethers";
 import Arena from "./components/Arena";
-import { useWallet } from "./context";
-
-// Constants
-const TWITTER_HANDLE = "sami_gabor";
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+import SelectCharacter from "./components/SelectCharacter";
+import { TWITTER_LINK, TWITTER_HANDLE } from "./constants";
+import { transformCharacterData } from "./utils/helper-functions";
 
 const App = () => {
-  const { account, balance, connectWallet } = useWallet();
+  const { contract } = useEthers();
+  const { account, connectWallet, chainId } = useWallet();
 
-  // const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
   const [weaponNFT, setWeaponNFT] = useState(null);
-  const [gameContract, setGameContract] = useState(null);
 
   const renderContent = () => {
     if (!account) {
@@ -53,62 +47,22 @@ const App = () => {
   };
 
   useEffect(() => {
-    const fetchNFTMetadata = async () => {
-      console.log("Checking for Character NFT on address:", account);
+    const fetchNFTsMetadata = async () => {
+      const characterTxn = await contract.checkIfUserHasNFTCharacter();
+      if (characterTxn.name) {
+        setCharacterNFT(transformCharacterData(characterTxn));
+      }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const newGameContract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        invasion.abi,
-        signer
-      );
-
-      setGameContract(newGameContract);
-
-      const txn = await newGameContract.checkIfUserHasNFTCharacter();
-      if (txn.name) {
-        console.log("User has character NFT");
-        setCharacterNFT(transformCharacterData(txn));
-      } else {
-        console.log("No character NFT found");
+      const weaponTxn = await contract.checkIfUserHasNFTWeapon();
+      if (weaponTxn.name) {
+        setWeaponNFT(transformCharacterData(weaponTxn));
       }
     };
 
-    if (account) {
-      console.log("account:", account);
-      fetchNFTMetadata();
+    if (account && contract) {
+      fetchNFTsMetadata();
     }
-  }, [account]);
-
-  useEffect(() => {
-    const fetchWeaponNFTMetadata = async () => {
-      console.log("Checking for Character NFT on address:", account);
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const newGameContract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        invasion.abi,
-        signer
-      );
-
-      setGameContract(newGameContract);
-
-      const txn = await newGameContract.checkIfUserHasNFTWeapon();
-      if (txn.name) {
-        console.log("User has weapon NFT");
-        setWeaponNFT(transformCharacterData(txn));
-      } else {
-        console.log("No weapon NFT found");
-      }
-    };
-
-    if (account) {
-      console.log("account:", account);
-      fetchWeaponNFTMetadata();
-    }
-  }, [account]);
+  }, [account, contract]);
 
   return (
     <div className="App">
@@ -116,7 +70,7 @@ const App = () => {
         <div className="header-container">
           <p className="header gradient-text">⚔️ Invasion ⚔️</p>
           <p className="sub-text">Team up to protect the Planet Earth!</p>
-          {window.ethereum && window.ethereum.networkVersion === "4" ? (
+          {chainId === "0x4" ? (
             renderContent()
           ) : (
             <h1 style={{ color: "white" }}>
