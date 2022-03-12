@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/invasion-game/static/css/main.86b3dde2.css",
-    "main.js": "/invasion-game/static/js/main.eb0197fa.js",
+    "main.css": "/invasion-game/static/css/main.a5384987.css",
+    "main.js": "/invasion-game/static/js/main.4ec6a1d2.js",
     "static/js/787.cda612ba.chunk.js": "/invasion-game/static/js/787.cda612ba.chunk.js",
     "static/media/twitter-logo.svg": "/invasion-game/static/media/twitter-logo.a8a752547c2913d8bc15e5df109748a6.svg",
     "index.html": "/invasion-game/index.html",
-    "main.86b3dde2.css.map": "/invasion-game/static/css/main.86b3dde2.css.map",
-    "main.eb0197fa.js.map": "/invasion-game/static/js/main.eb0197fa.js.map",
+    "main.a5384987.css.map": "/invasion-game/static/css/main.a5384987.css.map",
+    "main.4ec6a1d2.js.map": "/invasion-game/static/js/main.4ec6a1d2.js.map",
     "787.cda612ba.chunk.js.map": "/invasion-game/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.86b3dde2.css",
-    "static/js/main.eb0197fa.js"
+    "static/css/main.a5384987.css",
+    "static/js/main.4ec6a1d2.js"
   ]
 }
