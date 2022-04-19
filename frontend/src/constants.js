@@ -1,6 +1,6 @@
 import { rinkeby } from "./utils/networks";
 
-const CONTRACT_ADDRESS = "0xF0306C899d9F93dCF6068246Fb4d54aB5376c462";
+const CONTRACT_ADDRESS = "0x596C02BD461A21fBd09cA483BDf30EA83d94901C";
 
 const OPENSEA_COLLECTION_RINKEBY =
   "https://testnets.opensea.io/collection/heroes-ppiectmfuc";
