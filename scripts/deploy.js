@@ -1,7 +1,13 @@
 const hre = require("hardhat");
 
+/**
+ * npx hardhat run --network polygon scripts/deploy.js
+ * npx hardhat flatten contracts/Invasion.sol > flatted.sol
+ */
 async function main() {
   const Invasion = await hre.ethers.getContractFactory("Invasion");
+  console.log("Deploying Invasion...")
+
   const invasion = await Invasion.deploy(
     ["Iron Man", "Captain America", "Hulk"], // Names
     [
@@ -17,14 +23,16 @@ async function main() {
     50,
     ["The Hammer", "Infinity Gauntlet"], // Weapon Names
     [
-      "https://img.fruugo.com/product/4/71/154499714_max.jpg",
+      "https://www.wonderlandcostumes.com.au/assets/full/R_35639.jpg?20210319174656",
       "https://mlpnk72yciwc.i.optimole.com/cqhiHLc.WqA8~2eefa/w:600/h:853/q:75/https://bleedingcool.com/wp-content/uploads/2018/02/MARVEL-LEGENDS-SERIES-INFINITY-GAUNTLET-oop-2.jpg",
     ], // weapon images
     [500, 1000] // Attack damage values
   );
   // https://static.wikia.nocookie.net/avengers-assemble/images/e/ea/Revo-Cap.png/revision/latest/scale-to-width-down/1200?cb=20170615073447
+  console.log("Invasion deployed to:", invasion.address);
 
   await invasion.deployed();
+  console.log("Invasion deployed already:", invasion.address);
 
   console.log("Invasion deployed to:", invasion.address);
 

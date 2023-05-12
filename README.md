@@ -2,10 +2,8 @@
 
 ## Contract address
 
-0x596C02BD461A21fBd09cA483BDf30EA83d94901C
+0x826Ee0A7E72d05A3eD6412e4799a3F84B16f0020
 
 ## OpenSea NFT collection
 
-- https://testnets.opensea.io/collection/heroes-1vkj3z8hl5
-
-- NFT#1: https://testnets.opensea.io/assets/0x596c02bd461a21fbd09ca483bdf30ea83d94901c/1
+- https://opensea.io/collection/heroes-19

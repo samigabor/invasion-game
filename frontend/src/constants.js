@@ -3,7 +3,7 @@ import { polygon } from "./utils/networks";
 const CONTRACT_ADDRESS = "0x826Ee0A7E72d05A3eD6412e4799a3F84B16f0020";
 
 const OPENSEA_COLLECTION_RINKEBY =
-  "https://testnets.opensea.io/collection/heroes-ppiectmfuc";
+  "https://opensea.io/collection/heroes-19";
 
 const SUPPORTED_NETWORK = polygon;
 

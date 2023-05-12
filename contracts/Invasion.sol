@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 import "./libraries/Base64.sol";
 
 struct CharacterAttributes {
@@ -93,12 +93,12 @@ contract Invasion is ERC721, Ownable {
                 })
             );
 
-            CharacterAttributes memory w = defaultWeapons[i];
-            console.log(
-                "WEAPON_NAME: %s, WEAPON_IMAGE_URI: %s",
-                w.name,
-                w.imageURI
-            );
+            // CharacterAttributes memory w = defaultWeapons[i];
+            // console.log(
+            //     "WEAPON_NAME: %s, WEAPON_IMAGE_URI: %s",
+            //     w.name,
+            //     w.imageURI
+            // );
         }
 
         _tokenIdCounter.increment();
@@ -172,11 +172,11 @@ contract Invasion is ERC721, Ownable {
             attackDamage: defaultCharacters[_characterIndex].attackDamage
         });
 
-        console.log(
-            "Minted NFT w/ tokenId %s and characterIndex %s",
-            tokenId,
-            _characterIndex
-        );
+        // console.log(
+        //     "Minted NFT w/ tokenId %s and characterIndex %s",
+        //     tokenId,
+        //     _characterIndex
+        // );
 
         nftHolders[msg.sender] = tokenId;
 
@@ -203,11 +203,11 @@ contract Invasion is ERC721, Ownable {
             attackDamage: defaultWeapons[_weaponIndex].attackDamage
         });
 
-        console.log(
-            "Minted NFT w/ tokenId %s and characterIndex %s",
-            tokenId,
-            _weaponIndex
-        );
+        // console.log(
+        //     "Minted NFT w/ tokenId %s and characterIndex %s",
+        //     tokenId,
+        //     _weaponIndex
+        // );
 
         nftWeaponHolders[msg.sender] = tokenId;
 
@@ -240,18 +240,18 @@ contract Invasion is ERC721, Ownable {
             invador.hp = 0;
         }
 
-        console.log(
-            "\nPlayer w/ character %s about to attack. Has %s HP and %s AD",
-            player.name,
-            player.hp,
-            player.attackDamage
-        );
-        console.log(
-            "Invador %s has %s HP and %s AD",
-            invador.name,
-            invador.hp,
-            invador.attackDamage
-        );
+        // console.log(
+        //     "\nPlayer w/ character %s about to attack. Has %s HP and %s AD",
+        //     player.name,
+        //     player.hp,
+        //     player.attackDamage
+        // );
+        // console.log(
+        //     "Invador %s has %s HP and %s AD",
+        //     invador.name,
+        //     invador.hp,
+        //     invador.attackDamage
+        // );
 
         emit AttackComplete(invador.hp, player.hp);
     }
@@ -286,7 +286,7 @@ contract Invasion is ERC721, Ownable {
      **/
     function heal() external payable {
         require(msg.value >= healCost(), "Not enough funds to heal!");
-        console.log("Value sent for healing %s: ", msg.value);
+        // console.log("Value sent for healing %s: ", msg.value);
 
         uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
         CharacterAttributes storage player = nftHolderAttributes[
@@ -301,11 +301,11 @@ contract Invasion is ERC721, Ownable {
 
         player.hp = player.maxHp;
 
-        console.log(
-            "\nPlayer w/ character %s was healed and has %s HP",
-            player.name,
-            player.hp
-        );
+        // console.log(
+        //     "\nPlayer w/ character %s was healed and has %s HP",
+        //     player.name,
+        //     player.hp
+        // );
 
         emit HealComplete(player.characterIndex, player.hp);
     }

@@ -20,18 +20,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.12",
+  solidity: "0.8.9",
   networks: {
-    rinkeby: {
-      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY_RINKEBY_INVASION}`,
-      accounts: [process.env.METAMASK_PRIVATE_KEY_ACCOUNT_3],
-    },
-    ropsten: {
-      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY_ROPSTEN_INVASION}`,
-      accounts: [process.env.METAMASK_PRIVATE_KEY_ACCOUNT_1],
+    polygon: {
+      chainId: 137,
+      url: "https://polygon-rpc.com",
+      accounts: [process.env.KEY],
     },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.ETHERSCAN,
   },
 };

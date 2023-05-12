@@ -4,7 +4,8 @@
   "description": "Team up with other heroes to protect Earth",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "hardhat compile",
+    "deploy": "npx hardhat run --network polygon scripts/deploy.js"
   },
   "repository": {
     "type": "git",
