@@ -22,4 +22,16 @@ const rinkeby = {
   blockExplorerUrls: ["https://rinkeby.etherscan.io"],
 };
 
-export { mumbai, rinkeby };
+const polygon = {
+  chainId: "0x89", // 137 in decimal
+  chainName: "Polygon Mainnet",
+  rpcUrls: ["https://polygon-rpc.com/"],
+  nativeCurrency: {
+    name: "MATIC",
+    symbol: "MATIC",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://polygonscan.com"],
+};
+
+export { mumbai, rinkeby, polygon };

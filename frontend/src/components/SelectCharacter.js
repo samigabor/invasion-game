@@ -56,9 +56,9 @@ const SelectCharacter = ({ setCharacterNFT, setWeaponNFT }) => {
           setWeaponNFT(transformCharacterData(nft));
         }
         alert(
-          `Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${
+          `Your NFT is all done -- see it here: https://opensea.io/assets/matic/${
             contract.address
-          }/${tokenId.toNumber()} or here: https://rinkeby.rarible.com/token/${
+          }/${tokenId.toNumber()} or here: https://rarible.com/token/polygon/${
             contract.address
           }:${tokenId.toNumber()}`
         );

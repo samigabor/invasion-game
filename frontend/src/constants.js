@@ -1,11 +1,11 @@
-import { rinkeby } from "./utils/networks";
+import { polygon } from "./utils/networks";
 
-const CONTRACT_ADDRESS = "0x596C02BD461A21fBd09cA483BDf30EA83d94901C";
+const CONTRACT_ADDRESS = "0x826Ee0A7E72d05A3eD6412e4799a3F84B16f0020";
 
 const OPENSEA_COLLECTION_RINKEBY =
   "https://testnets.opensea.io/collection/heroes-ppiectmfuc";
 
-const SUPPORTED_NETWORK = rinkeby;
+const SUPPORTED_NETWORK = polygon;
 
 const TWITTER_HANDLE = "sami_gabor";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
